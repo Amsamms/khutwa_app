@@ -16,22 +16,7 @@ interface Child {
 export default function HomePage() {
   const router = useRouter();
   const [user, setUser] = useState<{ name: string; email: string } | null>(null);
-  const [children, setChildren] = useState<Child[]>([
-    {
-      id: '1',
-      name: 'Hala',
-      goal: 'Bicycle',
-      progress: 65,
-      avatar: '👧'
-    },
-    {
-      id: '2', 
-      name: 'Adam',
-      goal: 'PlayStation',
-      progress: 35,
-      avatar: '👦'
-    }
-  ]);
+  const [children, setChildren] = useState<Child[]>([]);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -40,6 +25,12 @@ export default function HomePage() {
       return;
     }
     setUser(JSON.parse(userData));
+
+    // Load children from localStorage
+    const savedChildren = localStorage.getItem('children');
+    if (savedChildren) {
+      setChildren(JSON.parse(savedChildren));
+    }
   }, [router]);
 
   const handleDisabledClick = () => {
@@ -114,29 +105,42 @@ export default function HomePage() {
           
           {/* Children List */}
           <div className="space-y-4">
-            {children.map((child) => (
-              <div key={child.id} className="flex items-center space-x-4">
-                {/* Avatar */}
-                <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-xl">
-                  {child.avatar}
-                </div>
-                
-                {/* Child Info and Progress */}
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-medium text-black">{child.name}</h3>
-                      <p className="text-sm text-gray-600">{child.goal}</p>
-                    </div>
+            {children.length > 0 ? (
+              children.map((child) => (
+                <div key={child.id} className="flex items-center space-x-4">
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-xl">
+                    {child.avatar}
                   </div>
                   
-                  {/* Progress Bar */}
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${child.progress}%` }}></div>
+                  {/* Child Info and Progress */}
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="font-medium text-black">{child.name}</h3>
+                        <p className="text-sm text-gray-600">{child.goal}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${child.progress}%` }}></div>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <div className="text-6xl mb-4">👶</div>
+                <p className="text-gray-500 text-base mb-4">No children added yet</p>
+                <button 
+                  onClick={handleAddChild}
+                  className="bg-primary-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors"
+                >
+                  Add Your First Child
+                </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
