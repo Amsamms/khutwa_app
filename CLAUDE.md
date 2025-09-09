@@ -419,12 +419,18 @@ src/
 - **Latest Deploy**: September 2024 - Add child functionality fix deployed
 
 ### Deployment Configuration
-- **Repository**: https://github.com/Amsamms/khutwa_app
+- **Repository**: https://github.com/Amsamms/khutwa_app (PRIMARY ONLY)
 - **Branch**: main
 - **Build Command**: `npm run build`
 - **Framework**: Auto-detected Next.js
+- **Git Remote**: `origin` points to khutwa_app repo only
 - **Environment Variables**: 
   - `OPENAI_API_KEY`: Configured via Vercel dashboard
+
+### Git Configuration
+- **Primary Repository**: https://github.com/Amsamms/khutwa_app
+- **Remote Setup**: Single `origin` remote (khutwa-financial-planning removed)
+- **Push Command**: `git push origin main` (pushes to khutwa_app)
 
 ### Key Deployment Fixes Applied
 1. **✅ Environment Variables**: Removed legacy secret references from vercel.json
