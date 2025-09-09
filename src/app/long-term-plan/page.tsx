@@ -16,7 +16,6 @@ export default function LongTermPlanPage() {
     gender: '',
     riskLevel: '' as 'LOW' | 'MEDIUM' | 'HIGH' | ''
   });
-  const [timelineValue, setTimelineValue] = useState(50);
   const [loading, setLoading] = useState(false);
 
   // Calculate timeline details
@@ -28,15 +27,6 @@ export default function LongTermPlanPage() {
   // Calculate monthly contribution based on user input
   const totalGoalAmount = parseInt(formData.goalAmount.replace(/[^0-9]/g, '')) || 500000;
   const monthlyContribution = months > 0 ? Math.round(totalGoalAmount / months) : 0;
-  
-  // Calculate target date
-  const targetDate = new Date();
-  targetDate.setFullYear(targetDate.getFullYear() + years);
-  const formattedDate = targetDate.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -194,53 +184,6 @@ export default function LongTermPlanPage() {
                   {level}
                 </button>
               ))}
-            </div>
-          </div>
-
-          {/* Timeline Section */}
-          <div className="space-y-6 border-t pt-8">
-            <h3 className="text-lg font-medium text-black">Timeline</h3>
-            
-            {/* Timeline Slider */}
-            <div className="space-y-4">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Start Today</span>
-                <span>50%</span>
-                <span>75%</span>
-                <span>Target Date</span>
-              </div>
-              
-              {/* Custom Progress Bar */}
-              <div className="relative">
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
-                    className="bg-primary-500 h-3 rounded-full relative"
-                    style={{ width: `${timelineValue}%` }}
-                  >
-                    <div className="absolute right-0 top-0 w-3 h-3 bg-primary-600 rounded-full transform translate-x-1/2"></div>
-                  </div>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={timelineValue}
-                  onChange={(e) => setTimelineValue(parseInt(e.target.value))}
-                  className="absolute inset-0 w-full h-3 opacity-0 cursor-pointer"
-                />
-              </div>
-            </div>
-            
-            {/* Timeline Details */}
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="text-sm text-gray-600">Monthly Contribution</div>
-                <div className="text-sm text-gray-600">End Date</div>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-semibold">{monthlyContribution.toLocaleString()} SAR</div>
-                <div className="text-sm text-gray-600">{formattedDate}</div>
-              </div>
             </div>
           </div>
 
