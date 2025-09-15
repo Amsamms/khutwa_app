@@ -76,7 +76,8 @@ export default function HomePage() {
       <div className="p-6 space-y-8">
         {/* Welcome Section - Mobile Optimized */}
         <div>
-          <h1 className="text-xl sm:text-2xl font-medium text-black">Welcome, {user.name}</h1>
+          <h1 className="text-xl sm:text-2xl font-medium text-black">Welcome to Khutwa App</h1>
+          <p className="text-base sm:text-lg text-gray-600 mt-2">Where planning for years takes minutes</p>
         </div>
 
         {/* Long-Term Plan Section */}

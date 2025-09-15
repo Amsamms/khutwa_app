@@ -36,14 +36,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Application Architecture
 
-### Route Structure (Based on Reference Photos)
+### Route Structure (Updated - No Sign-in Required)
 ```
-/ → Splash screen with Khutwa logo (Logo and name.png)
-/login → Fake login page (Fake log in.png - English interface as shown)
+/ → Splash screen with Khutwa logo → Auto-redirects to /home (No login required)
 /home → Dashboard (Home Page only active buttons would be add child and long plan.png)
-/add-child → Child registration form (Add Child button.png)  
+/add-child → Child registration form (Add Child button.png)
 /long-term-plan → Financial planning form (Long term plan button.png)
+/login → Legacy login page (DEPRECATED - No longer in use)
 ```
+
+## 🔄 LATEST UPDATE: Sign-in Functionality Removed (Sep 15, 2025)
+
+### ✅ Changes Made:
+- **Removed Login Requirement**: Users can now access the app directly without authentication
+- **Splash Page Updated**: Now redirects directly to `/home` instead of `/login`
+- **Default User**: Sets Arabic default user "المستخدم" (The User) automatically
+- **Seamless Experience**: All functionality available immediately upon visiting the site
+
+### 🧪 Testing Results (Sep 15, 2025):
+- ✅ **Vercel Deployment**: Successfully deployed to https://khutwa-app.vercel.app/
+- ✅ **Direct Access**: Splash screen → Home page (2-second auto-redirect)
+- ✅ **Add Child**: Form accessible and functional
+- ✅ **Long-term Plan**: Financial planning form working correctly
+- ✅ **No Authentication Barrier**: Complete app functionality without login
+
+### 🎯 Benefits:
+- **Simplified UX**: No registration/login friction
+- **Immediate Access**: Users can start planning right away
+- **Data Persistence**: Still maintains localStorage for returning users
+- **Mobile Optimized**: All functionality works on mobile devices
 
 ### EXACT UI Specifications From Photos
 
