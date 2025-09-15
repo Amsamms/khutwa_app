@@ -19,12 +19,15 @@ export default function HomePage() {
   const [children, setChildren] = useState<Child[]>([]);
 
   useEffect(() => {
+    // Set default user (no login required)
+    const defaultUser = { name: 'المستخدم', email: 'user@khutwa.app' };
     const userData = localStorage.getItem('user');
-    if (!userData) {
-      router.push('/login');
-      return;
+    if (userData) {
+      setUser(JSON.parse(userData));
+    } else {
+      setUser(defaultUser);
+      localStorage.setItem('user', JSON.stringify(defaultUser));
     }
-    setUser(JSON.parse(userData));
 
     // Load children from localStorage
     const savedChildren = localStorage.getItem('children');

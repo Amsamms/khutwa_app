@@ -8,9 +8,9 @@ export default function SplashPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Auto-redirect to login after 2 seconds
+    // Auto-redirect to home after 2 seconds (skip login)
     const timer = setTimeout(() => {
-      router.push('/login');
+      router.push('/home');
     }, 2000);
 
     return () => clearTimeout(timer);
