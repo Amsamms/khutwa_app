@@ -71,11 +71,27 @@ export default function LongTermPlanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+            <div className="mb-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
+            </div>
+            <h2 className="text-xl font-semibold text-black mb-2">Generating Your Financial Plan</h2>
+            <p className="text-gray-600 mb-4">Please don't leave this page. This process may take up to 60 seconds.</p>
+            <div className="text-sm text-primary-600">
+              ✨ Creating personalized recommendations...
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center p-6 border-b border-gray-100">
         <Logo size="sm" showText={true} />
-        <button onClick={() => router.push('/home')}>
+        <button onClick={() => router.push('/home')} disabled={loading}>
           <Home className="w-8 h-8 text-primary-500" />
         </button>
       </div>
@@ -88,7 +104,7 @@ export default function LongTermPlanPage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleGeneratePlan} className="space-y-6 max-w-4xl mx-auto">
+        <form onSubmit={handleGeneratePlan} className={`space-y-6 max-w-4xl mx-auto ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
           {/* Name - Mobile Optimized */}
           <div className="space-y-3">
             <label className="block text-base font-medium text-black">Name (required )</label>
