@@ -45,7 +45,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 /login → Legacy login page (DEPRECATED - No longer in use)
 ```
 
-## 🔄 LATEST UPDATE: Sign-in Functionality Removed (Sep 15, 2025)
+## 🔄 LATEST UPDATE: Streamlined UX with "Start Planning" Button (Sep 16, 2025)
+
+### ✅ Changes Made:
+- **Replaced "Add Your First Child"**: Central button now says "Start Planning"
+- **Better UX Flow**: Direct access to financial planning without child registration friction
+- **Updated Icon**: Changed from 👶 (baby) to 🎯 (target) for better alignment
+- **Improved Messaging**: "Ready to start planning your financial future?"
+- **Streamlined Journey**: Home → Planning (vs Home → Add Child → Planning)
+
+### 🧪 Testing Results (Sep 16, 2025):
+- ✅ **Vercel Deployment**: Successfully deployed to https://khutwa-app.vercel.app/
+- ✅ **Start Planning Button**: Redirects directly to /long-term-plan
+- ✅ **Add Child Still Works**: Bottom "Add Child" button still redirects to /add-child
+- ✅ **All Other Buttons**: Add Task, Add Goal, Challenge all working correctly
+- ✅ **Better User Flow**: Eliminates unnecessary child registration step
+
+### 🎯 Benefits:
+- **Faster Value Delivery**: Users reach core functionality immediately
+- **Reduced Friction**: No mandatory child registration before planning
+- **More Flexible**: Users can plan without pre-adding children details
+- **Better Alignment**: Matches app tagline "Where planning for years takes minutes"
+
+## 🔄 PREVIOUS UPDATE: Sign-in Functionality Removed (Sep 15, 2025)
 
 ### ✅ Changes Made:
 - **Removed Login Requirement**: Users can now access the app directly without authentication

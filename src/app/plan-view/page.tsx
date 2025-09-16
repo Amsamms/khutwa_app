@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Logo } from '@/components/Logo';
+import { PlanDisplay } from '@/components/PlanDisplay';
 import { Home, Download } from 'lucide-react';
 
 interface GeneratedPlan {
@@ -40,86 +41,39 @@ export default function PlanViewPage() {
 
   const handleDownloadPDF = async () => {
     if (!plan) return;
-    
+
     setLoading(true);
     try {
+      // Get the formatted plan element
+      const planElement = document.getElementById('plan-display-content');
+      if (!planElement) {
+        throw new Error('Plan content not found');
+      }
+
       // Import html2pdf.js for better Arabic support
       const html2pdf = (await import('html2pdf.js')).default;
-      
-      // Create a temporary div with the plan content
-      const element = document.createElement('div');
-      element.style.cssText = `
-        font-family: 'Arial', sans-serif;
-        direction: rtl;
-        text-align: right;
-        padding: 20px;
-        background: white;
-        color: black;
-        line-height: 1.6;
-      `;
-      
-      // Build HTML content
-      element.innerHTML = `
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #4F46E5; font-size: 24px; margin-bottom: 10px;">خطة مالية مخصصة</h1>
-          <h2 style="font-size: 18px; color: #666;">${plan.name} - ${plan.goal}</h2>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; direction: rtl;">
-          <div style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
-            <strong>الاسم:</strong> ${plan.name}
-          </div>
-          <div style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
-            <strong>الهدف:</strong> ${plan.goal}
-          </div>
-          <div style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
-            <strong>العمر الحالي:</strong> ${plan.age} سنة
-          </div>
-          <div style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
-            <strong>العمر المستهدف:</strong> ${plan.targetAge} سنة
-          </div>
-          <div style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
-            <strong>مستوى المخاطرة:</strong> ${plan.riskLevel}
-          </div>
-          <div style="background: #f8f9fa; padding: 10px; border-radius: 5px;">
-            <strong>المساهمة الشهرية:</strong> ${plan.monthlyContribution.toLocaleString()} ريال
-          </div>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: #4F46E5; border-bottom: 2px solid #4F46E5; padding-bottom: 5px;">تفاصيل الخطة المالية</h3>
-        </div>
-        
-        <div style="white-space: pre-line; line-height: 1.8;">
-          ${plan.content.replace(/\*\*/g, '').replace(/###/g, '').replace(/##/g, '')}
-        </div>
-        
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 12px;">
-          <p>تم إنشاء هذه الخطة في ${new Date().toLocaleDateString('ar-SA')}</p>
-          <p>خطة مالية من تطبيق خطوة - Khutwa Financial Planning</p>
-        </div>
-      `;
-      
+
       // Configure options for PDF generation
       const options = {
-        margin: 1,
+        margin: 0.5,
         filename: `${plan.name}-Financial-Plan.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
+        html2canvas: {
           scale: 2,
           useCORS: true,
-          letterRendering: true
+          letterRendering: true,
+          backgroundColor: '#ffffff'
         },
-        jsPDF: { 
-          unit: 'in', 
-          format: 'a4', 
-          orientation: 'portrait' 
+        jsPDF: {
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait'
         }
       };
-      
-      // Generate and download PDF
-      await html2pdf().set(options).from(element).save();
-      
+
+      // Generate and download PDF with the beautiful formatted content
+      await html2pdf().set(options).from(planElement).save();
+
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert('Failed to download PDF. Please try again.');
@@ -153,46 +107,28 @@ export default function PlanViewPage() {
       </div>
 
       {/* Plan Content */}
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-6 max-w-6xl mx-auto bg-gray-50 min-h-screen">
         {/* Plan Header */}
-        <div className="text-center mb-8 border-b pb-6">
-          <h1 className="text-3xl font-bold text-black mb-2">خطة مالية مخصصة</h1>
-          <h2 className="text-xl text-gray-600 mb-4">{plan.name} - {plan.goal}</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div className="bg-gray-50 p-3 rounded">
-              <div className="font-medium">العمر الحالي</div>
-              <div>{plan.age} سنة</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded">
-              <div className="font-medium">العمر المستهدف</div>
-              <div>{plan.targetAge} سنة</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded">
-              <div className="font-medium">مستوى المخاطرة</div>
-              <div>{plan.riskLevel}</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded">
-              <div className="font-medium">المساهمة الشهرية</div>
-              <div>{plan.monthlyContribution.toLocaleString()} ريال</div>
-            </div>
-          </div>
+        <div className="text-center mb-8 bg-white p-6 rounded-xl shadow-lg border" dir="rtl">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">📊 خطة مالية مخصصة</h1>
+          <h2 className="text-2xl text-blue-600 mb-4">{plan.name} - {plan.goal}</h2>
+          <p className="text-gray-600">تم إنشاء هذه الخطة في {new Date(plan.generatedAt).toLocaleDateString('ar-SA')}</p>
         </div>
 
-        {/* Plan Content */}
-        <div className="arabic prose max-w-none">
-          <div 
-            className="text-right leading-relaxed text-gray-800"
-            style={{ fontFamily: 'Cairo, sans-serif', direction: 'rtl' }}
-            dangerouslySetInnerHTML={{ 
-              __html: plan.content.replace(/\n/g, '<br/>') 
-            }}
-          />
+        {/* Beautiful Plan Display */}
+        <div id="plan-display-content" className="bg-gray-50">
+          <PlanDisplay plan={plan} />
         </div>
 
         {/* Footer */}
-        <div className="mt-12 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
-          <p>تم إنشاء هذه الخطة في {new Date(plan.generatedAt).toLocaleDateString('ar-SA')}</p>
-          <p className="mt-2">خطة مالية من تطبيق خطوة - Khutwa Financial Planning</p>
+        <div className="mt-12 pt-8 text-center">
+          <div className="bg-white p-6 rounded-xl shadow-lg border">
+            <div className="text-sm text-gray-500" dir="rtl">
+              <p className="text-lg font-semibold text-gray-700 mb-2">🎯 خطة مالية من تطبيق خطوة</p>
+              <p>Khutwa Financial Planning - تطبيق التخطيط المالي الذكي</p>
+              <p className="mt-2 text-blue-600">حيث التخطيط لسنوات يتم في دقائق</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
