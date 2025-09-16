@@ -9,6 +9,7 @@ import { Home, Download } from 'lucide-react';
 interface GeneratedPlan {
   name: string;
   goal: string;
+  goalAmount: string;
   age: number;
   targetAge: number;
   gender: string;
