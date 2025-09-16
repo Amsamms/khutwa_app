@@ -36,6 +36,18 @@ export default function HomePage() {
     }
   }, [router]);
 
+  const handleAddTask = () => {
+    router.push('/long-term-plan');
+  };
+
+  const handleAddGoal = () => {
+    router.push('/long-term-plan');
+  };
+
+  const handleChallenge = () => {
+    router.push('/long-term-plan');
+  };
+
   const handleDisabledClick = () => {
     alert('قريبًا (Coming Soon)');
   };
@@ -151,24 +163,21 @@ export default function HomePage() {
         {/* Bottom Navigation - Mobile Optimized */}
         <div className="flex flex-col md:flex-row justify-between items-center pt-8 space-y-6 md:space-y-0">
           <div className="grid grid-cols-2 md:flex md:space-x-4 gap-4 md:gap-0 w-full md:w-auto">
-            <button 
-              onClick={handleDisabledClick}
-              className="bg-gray-400 text-white px-6 md:px-6 py-4 md:py-3 rounded-lg text-sm md:text-sm font-medium cursor-not-allowed min-h-[48px] touch-manipulation"
-              disabled
+            <button
+              onClick={handleAddTask}
+              className="bg-primary-500 text-white px-6 md:px-6 py-4 md:py-3 rounded-lg text-sm md:text-sm font-medium hover:bg-primary-600 transition-colors min-h-[48px] touch-manipulation"
             >
               Add Task
             </button>
-            <button 
-              onClick={handleDisabledClick}
-              className="bg-gray-400 text-white px-6 md:px-6 py-4 md:py-3 rounded-lg text-sm md:text-sm font-medium cursor-not-allowed min-h-[48px] touch-manipulation"
-              disabled
+            <button
+              onClick={handleAddGoal}
+              className="bg-primary-500 text-white px-6 md:px-6 py-4 md:py-3 rounded-lg text-sm md:text-sm font-medium hover:bg-primary-600 transition-colors min-h-[48px] touch-manipulation"
             >
               Add Goal
             </button>
-            <button 
-              onClick={handleDisabledClick}
-              className="bg-gray-400 text-white px-6 md:px-6 py-4 md:py-3 rounded-lg text-sm md:text-sm font-medium cursor-not-allowed min-h-[48px] touch-manipulation"
-              disabled
+            <button
+              onClick={handleChallenge}
+              className="bg-primary-500 text-white px-6 md:px-6 py-4 md:py-3 rounded-lg text-sm md:text-sm font-medium hover:bg-primary-600 transition-colors min-h-[48px] touch-manipulation"
             >
               Challenge
             </button>
