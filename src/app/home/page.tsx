@@ -147,13 +147,13 @@ export default function HomePage() {
               ))
             ) : (
               <div className="text-center py-8">
-                <div className="text-6xl mb-4">👶</div>
-                <p className="text-gray-500 text-base mb-4">No children added yet</p>
-                <button 
-                  onClick={handleAddChild}
+                <div className="text-6xl mb-4">🎯</div>
+                <p className="text-gray-500 text-base mb-4">Ready to start planning your financial future?</p>
+                <button
+                  onClick={handleLongTermPlan}
                   className="bg-primary-500 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors"
                 >
-                  Add Your First Child
+                  Start Planning
                 </button>
               </div>
             )}
