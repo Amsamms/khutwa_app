@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, goal, goalAmount, age, targetAge, gender, riskLevel, monthlyContribution, years } = body;
 
-    // Construct comprehensive Arabic prompt for detailed financial planning
+    // Construct comprehensive Arabic prompt with structured data markers
     const prompt = `
 أنشئ خطة مالية شاملة ومفصلة بناءً على هذه المدخلات:
 الاسم: ${name}
@@ -25,6 +25,25 @@ export async function POST(request: NextRequest) {
 الأفق الزمني: ${years} سنة
 
 **هام جداً: يجب أن تكون جميع الحسابات والتوصيات مبنية على المبلغ المستهدف المحدد (${goalAmount}) وليس أي رقم آخر.**
+
+**تنسيق مطلوب للاستجابة:**
+1. ابدأ استجابتك بعلامات البيانات المنظمة التالية:
+[DATA:EXPECTED_RETURN:النسبة:PERCENT] - معدل العائد المتوقع السنوي
+[DATA:MONTHLY_CONTRIBUTION:المبلغ:SAR] - المساهمة الشهرية المقترحة
+[DATA:TOTAL_EXPECTED:المبلغ:SAR] - إجمالي المبلغ المتوقع في نهاية المدة
+
+2. ثم قدم توزيع الاستثمارات بهذا التنسيق:
+[ALLOCATION:اسم_الأصل:النسبة_المئوية]
+مثال: [ALLOCATION:صناديق_استثمارية:35]
+
+3. ثم قدم إسقاطات سنوية بهذا التنسيق:
+[PROJECTION:السنة:المبلغ_المدخر:ملاحظات]
+مثال: [PROJECTION:1:52000:نمو مستقر]
+
+4. استخدم العناوين المنظمة:
+## للعناوين الرئيسية
+### للعناوين الفرعية
+**للتأكيد والنقاط المهمة**
 
 أريد خطة مالية شاملة ومفصلة جداً تتضمن الأقسام التالية بالتفصيل:
 
@@ -123,7 +142,7 @@ export async function POST(request: NextRequest) {
 `;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-5",
       messages: [
         {
           role: "system",
@@ -134,8 +153,8 @@ export async function POST(request: NextRequest) {
           content: prompt
         }
       ],
-      max_tokens: 16000,
-      temperature: 0.7,
+      max_completion_tokens: 16000,
+      reasoning_effort: "low"
     });
 
     const planContent = completion.choices[0]?.message?.content || '';

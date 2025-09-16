@@ -80,7 +80,7 @@ export default function LongTermPlanPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
             </div>
             <h2 className="text-xl font-semibold text-black mb-2">Generating Your Financial Plan</h2>
-            <p className="text-gray-600 mb-4">Please don't leave this page. This process may take up to 60 seconds.</p>
+            <p className="text-gray-600 mb-4">Please don't leave this page. This process may take up to 3 minutes.</p>
             <div className="text-sm text-primary-600">
               ✨ Creating personalized recommendations...
             </div>

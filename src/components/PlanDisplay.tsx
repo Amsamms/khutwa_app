@@ -39,55 +39,166 @@ interface PlanDisplayProps {
 const COLORS = ['#4F46E5', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
-  // Parse content to extract sections
+  // Extract structured data from GPT-5 response
+  const extractStructuredData = (content: string) => {
+    const data = {
+      expectedReturn: 6, // Default fallback
+      monthlyContribution: plan.monthlyContribution,
+      totalExpected: parseInt(plan.goalAmount.replace(/[^0-9]/g, '')) || 500000,
+      allocations: [] as Array<{name: string, value: number, color: string}>,
+      projections: [] as Array<{year: number, amount: number, notes: string}>
+    };
+
+    // Extract DATA markers
+    const dataRegex = /\[DATA:([^:]+):([^:]+):([^\]]+)\]/g;
+    let match;
+    while ((match = dataRegex.exec(content)) !== null) {
+      const [, key, value, unit] = match;
+      if (key === 'EXPECTED_RETURN') {
+        data.expectedReturn = parseFloat(value) || 6;
+      } else if (key === 'MONTHLY_CONTRIBUTION') {
+        data.monthlyContribution = parseFloat(value.replace(/[^0-9]/g, '')) || data.monthlyContribution;
+      } else if (key === 'TOTAL_EXPECTED') {
+        data.totalExpected = parseFloat(value.replace(/[^0-9]/g, '')) || data.totalExpected;
+      }
+    }
+
+    // Extract ALLOCATION markers
+    const allocationRegex = /\[ALLOCATION:([^:]+):([^\]]+)\]/g;
+    const colors = ['#4F46E5', '#10B981', '#06B6D4', '#F59E0B', '#EF4444', '#8B5CF6'];
+    let colorIndex = 0;
+    while ((match = allocationRegex.exec(content)) !== null) {
+      const [, name, percentage] = match;
+      data.allocations.push({
+        name: name.replace(/_/g, ' '),
+        value: parseFloat(percentage) || 0,
+        color: colors[colorIndex % colors.length]
+      });
+      colorIndex++;
+    }
+
+    // Extract PROJECTION markers
+    const projectionRegex = /\[PROJECTION:([^:]+):([^:]+):([^\]]*)\]/g;
+    while ((match = projectionRegex.exec(content)) !== null) {
+      const [, year, amount, notes] = match;
+      data.projections.push({
+        year: parseInt(year) || 0,
+        amount: parseFloat(amount.replace(/[^0-9]/g, '')) || 0,
+        notes: notes || ''
+      });
+    }
+
+    return data;
+  };
+
+  // Parse content to extract sections with enhanced formatting
   const parseContent = (content: string) => {
     const sections = [];
     const lines = content.split('\n');
-    let currentSection = { title: '', content: '', icon: CheckCircle };
+    let currentSection = { title: '', content: '', icon: CheckCircle, level: 1 };
 
     for (const line of lines) {
-      if (line.includes('**') && (line.includes('الملخص') || line.includes('ملخص'))) {
+      const trimmedLine = line.trim();
+
+      // Skip data markers and allocation markers (already processed)
+      if (trimmedLine.match(/\[DATA:|ALLOCATION:|PROJECTION:\]/)) {
+        continue;
+      }
+
+      // Handle main headers (##)
+      if (trimmedLine.startsWith('##') && !trimmedLine.startsWith('###')) {
         if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: Target };
-      } else if (line.includes('**') && (line.includes('استراتيجية') || line.includes('الاستراتيجية'))) {
+        const title = trimmedLine.replace(/^##\s*/, '').replace(/\*/g, '').trim();
+        currentSection = {
+          title,
+          content: '',
+          icon: getIconForSection(title),
+          level: 1
+        };
+      }
+      // Handle subheaders (###)
+      else if (trimmedLine.startsWith('###')) {
         if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: TrendingUp };
-      } else if (line.includes('**') && (line.includes('مساهمة') || line.includes('المساهمة'))) {
+        const title = trimmedLine.replace(/^###\s*/, '').replace(/\*/g, '').trim();
+        currentSection = {
+          title,
+          content: '',
+          icon: getIconForSection(title),
+          level: 2
+        };
+      }
+      // Handle bold markers for sections
+      else if (trimmedLine.includes('**') && trimmedLine.includes('.')) {
         if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: DollarSign };
-      } else if (line.includes('**') && (line.includes('مخاطر') || line.includes('المخاطر'))) {
-        if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: AlertTriangle };
-      } else if (line.includes('**') && (line.includes('زمنية') || line.includes('الزمنية'))) {
-        if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: Calendar };
-      } else if (line.includes('**') && (line.includes('تعليم') || line.includes('التعليم'))) {
-        if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: BookOpen };
-      } else if (line.includes('**') && (line.includes('أدوات') || line.includes('الأدوات'))) {
-        if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: BarChart3 };
-      } else if (line.includes('**') && (line.includes('بديل') || line.includes('البدائل'))) {
-        if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: Lightbulb };
-      } else if (line.includes('**') && line.trim().length > 0) {
-        if (currentSection.title) sections.push(currentSection);
-        currentSection = { title: line.replace(/\*/g, '').trim(), content: '', icon: CheckCircle };
-      } else if (line.trim().length > 0) {
-        currentSection.content += line.trim() + '\n';
+        const title = trimmedLine.replace(/\*/g, '').replace(/^\d+\.\s*/, '').trim();
+        currentSection = {
+          title,
+          content: '',
+          icon: getIconForSection(title),
+          level: 1
+        };
+      }
+      // Add content lines
+      else if (trimmedLine.length > 0 && currentSection.title) {
+        // Format the content with proper markdown rendering
+        let formattedLine = trimmedLine;
+
+        // Handle bullet points
+        if (formattedLine.startsWith('-')) {
+          formattedLine = '• ' + formattedLine.substring(1).trim();
+        }
+
+        // Handle bold text (**text**)
+        formattedLine = formattedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+        // Handle numbers and percentages
+        formattedLine = formattedLine.replace(/(\d+(?:,\d+)*)\s*(ريال|SAR|%)/g, '<span class="font-semibold text-blue-600">$1 $2</span>');
+
+        currentSection.content += formattedLine + '\n';
       }
     }
 
     if (currentSection.title) sections.push(currentSection);
-    return sections;
+    return sections.filter(section => section.title && section.content.trim());
   };
 
-  // Generate chart data with compound growth
+  // Get appropriate icon for section based on content
+  const getIconForSection = (title: string): React.ComponentType<any> => {
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes('ملخص') || titleLower.includes('نظرة')) return Target;
+    if (titleLower.includes('استراتيجية') || titleLower.includes('نمو')) return TrendingUp;
+    if (titleLower.includes('مساهمة') || titleLower.includes('شهرية')) return DollarSign;
+    if (titleLower.includes('مخاطر') || titleLower.includes('تحدي')) return AlertTriangle;
+    if (titleLower.includes('زمن') || titleLower.includes('مدة')) return Calendar;
+    if (titleLower.includes('تعليم') || titleLower.includes('تطوير')) return BookOpen;
+    if (titleLower.includes('أداة') || titleLower.includes('قياس')) return BarChart3;
+    if (titleLower.includes('بديل') || titleLower.includes('خيار')) return Lightbulb;
+    return CheckCircle;
+  };
+
+  // Extract structured data from GPT-5 response
+  const structuredData = extractStructuredData(plan.content);
+
+  // Generate chart data using GPT-5 extracted data or fallback to calculations
   const generateSavingsData = () => {
+    // If GPT-5 provided projections, use them
+    if (structuredData.projections.length > 0) {
+      const data = [{ period: 'البداية', amount: 0, target: 0 }];
+      structuredData.projections.forEach(proj => {
+        data.push({
+          period: `السنة ${proj.year}`,
+          amount: proj.amount,
+          target: (proj.amount / structuredData.totalExpected) * 100
+        });
+      });
+      return data;
+    }
+
+    // Fallback to calculated data using GPT-5's expected return rate
     const data = [];
-    const monthlyAmount = plan.monthlyContribution;
+    const monthlyAmount = structuredData.monthlyContribution;
     const totalMonths = plan.years * 12;
-    const monthlyRate = 0.06 / 12; // 6% annual return = 0.5% monthly
+    const monthlyRate = structuredData.expectedReturn / 100 / 12; // Convert to monthly rate
 
     for (let i = 0; i <= totalMonths; i += 6) { // Every 6 months
       let totalSaved = 0;
@@ -96,19 +207,24 @@ export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
         totalSaved = monthlyAmount * ((Math.pow(1 + monthlyRate, i) - 1) / monthlyRate);
       }
       const year = Math.floor(i / 12);
-      const targetGoalAmount = parseInt(plan.goalAmount.replace(/[^0-9]/g, '')) || 500000;
 
       data.push({
         period: i === 0 ? 'البداية' : `السنة ${year}`,
         amount: Math.round(totalSaved),
-        target: (totalSaved / targetGoalAmount) * 100
+        target: (totalSaved / structuredData.totalExpected) * 100
       });
     }
 
     return data;
   };
 
-  const generateRiskAllocation = () => {
+  const getRiskAllocation = () => {
+    // If GPT-5 provided allocation data, use it
+    if (structuredData.allocations.length > 0) {
+      return structuredData.allocations;
+    }
+
+    // Fallback to hardcoded allocations
     const allocations = {
       'LOW': [
         { name: 'سندات حكومية', value: 40, color: '#10B981' },
@@ -134,7 +250,7 @@ export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
   };
 
   const savingsData = generateSavingsData();
-  const riskAllocation = generateRiskAllocation();
+  const riskAllocation = getRiskAllocation();
   const sections = parseContent(plan.content);
 
   return (
@@ -275,9 +391,11 @@ export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
               <div className="prose max-w-none text-gray-700 leading-relaxed">
                 {section.content.split('\n').map((paragraph, pIndex) => (
                   paragraph.trim() && (
-                    <p key={pIndex} className="mb-4 text-justify">
-                      {paragraph.trim()}
-                    </p>
+                    <p
+                      key={pIndex}
+                      className={`mb-4 text-justify ${section.level === 2 ? 'text-sm' : ''}`}
+                      dangerouslySetInnerHTML={{ __html: paragraph.trim() }}
+                    />
                   )
                 ))}
               </div>
@@ -296,12 +414,21 @@ export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
           <div className="absolute right-4 top-8 bottom-8 w-0.5 bg-blue-300"></div>
           {Array.from({ length: plan.years }, (_, i) => {
             const year = i + 1;
-            // Calculate with compound growth (6% annual return for balanced portfolio)
-            const monthlyRate = 0.06 / 12; // 6% annual = 0.5% monthly
-            const months = year * 12;
-            const compoundAmount = plan.monthlyContribution *
-              ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
-            const savedAmount = Math.round(compoundAmount);
+
+            // Use GPT-5 projection data if available, otherwise calculate
+            let savedAmount = 0;
+            const gptProjection = structuredData.projections.find(p => p.year === year);
+
+            if (gptProjection) {
+              savedAmount = gptProjection.amount;
+            } else {
+              // Calculate with compound growth using GPT-5's expected return rate
+              const monthlyRate = structuredData.expectedReturn / 100 / 12; // Convert to monthly rate
+              const months = year * 12;
+              const compoundAmount = structuredData.monthlyContribution *
+                ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+              savedAmount = Math.round(compoundAmount);
+            }
             return (
               <div key={year} className="relative flex items-center mb-8">
                 <div className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ml-6">
