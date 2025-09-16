@@ -20,6 +20,7 @@ import {
 interface GeneratedPlan {
   name: string;
   goal: string;
+  goalAmount: string;
   age: number;
   targetAge: number;
   gender: string;
@@ -81,19 +82,26 @@ export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
     return sections;
   };
 
-  // Generate chart data
+  // Generate chart data with compound growth
   const generateSavingsData = () => {
     const data = [];
     const monthlyAmount = plan.monthlyContribution;
     const totalMonths = plan.years * 12;
+    const monthlyRate = 0.06 / 12; // 6% annual return = 0.5% monthly
 
     for (let i = 0; i <= totalMonths; i += 6) { // Every 6 months
-      const totalSaved = monthlyAmount * i;
+      let totalSaved = 0;
+      if (i > 0) {
+        // Calculate compound growth using future value of annuity formula
+        totalSaved = monthlyAmount * ((Math.pow(1 + monthlyRate, i) - 1) / monthlyRate);
+      }
       const year = Math.floor(i / 12);
+      const targetGoalAmount = parseInt(plan.goalAmount.replace(/[^0-9]/g, '')) || 500000;
+
       data.push({
         period: i === 0 ? 'البداية' : `السنة ${year}`,
-        amount: totalSaved,
-        target: (totalSaved / (monthlyAmount * totalMonths)) * 100
+        amount: Math.round(totalSaved),
+        target: (totalSaved / targetGoalAmount) * 100
       });
     }
 
@@ -137,7 +145,7 @@ export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm opacity-80">الهدف المالي</h3>
-              <p className="text-2xl font-bold">{(plan.monthlyContribution * plan.years * 12).toLocaleString()} ريال</p>
+              <p className="text-2xl font-bold">{plan.goalAmount}</p>
             </div>
             <Target className="w-8 h-8 opacity-80" />
           </div>
@@ -286,9 +294,14 @@ export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
         </div>
         <div className="relative">
           <div className="absolute right-4 top-8 bottom-8 w-0.5 bg-blue-300"></div>
-          {Array.from({ length: Math.min(plan.years, 5) }, (_, i) => {
+          {Array.from({ length: plan.years }, (_, i) => {
             const year = i + 1;
-            const savedAmount = plan.monthlyContribution * year * 12;
+            // Calculate with compound growth (6% annual return for balanced portfolio)
+            const monthlyRate = 0.06 / 12; // 6% annual = 0.5% monthly
+            const months = year * 12;
+            const compoundAmount = plan.monthlyContribution *
+              ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+            const savedAmount = Math.round(compoundAmount);
             return (
               <div key={year} className="relative flex items-center mb-8">
                 <div className="bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ml-6">

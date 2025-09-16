@@ -8,13 +8,14 @@ const openai = new OpenAI({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, goal, age, targetAge, gender, riskLevel, monthlyContribution, years } = body;
+    const { name, goal, goalAmount, age, targetAge, gender, riskLevel, monthlyContribution, years } = body;
 
     // Construct comprehensive Arabic prompt for detailed financial planning
     const prompt = `
 أنشئ خطة مالية شاملة ومفصلة بناءً على هذه المدخلات:
 الاسم: ${name}
 الهدف: ${goal}
+المبلغ المستهدف: ${goalAmount} ريال سعودي
 العمر الحالي: ${age}
 العمر المستهدف: ${targetAge}
 الجنس: ${gender}
@@ -22,6 +23,8 @@ export async function POST(request: NextRequest) {
 المساهمة الشهرية المقترحة: ${monthlyContribution} ريال سعودي
 العملة: SAR
 الأفق الزمني: ${years} سنة
+
+**هام جداً: يجب أن تكون جميع الحسابات والتوصيات مبنية على المبلغ المستهدف المحدد (${goalAmount}) وليس أي رقم آخر.**
 
 أريد خطة مالية شاملة ومفصلة جداً تتضمن الأقسام التالية بالتفصيل:
 
@@ -143,6 +146,7 @@ export async function POST(request: NextRequest) {
       plan: {
         name,
         goal,
+        goalAmount,
         age: parseInt(age),
         targetAge: parseInt(targetAge),
         gender,
