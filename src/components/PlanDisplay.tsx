@@ -163,7 +163,7 @@ export const PlanDisplay: React.FC<PlanDisplayProps> = ({ plan }) => {
   };
 
   // Get appropriate icon for section based on content
-  const getIconForSection = (title: string): React.ComponentType<any> => {
+  const getIconForSection = (title: string) => {
     const titleLower = title.toLowerCase();
     if (titleLower.includes('ملخص') || titleLower.includes('نظرة')) return Target;
     if (titleLower.includes('استراتيجية') || titleLower.includes('نمو')) return TrendingUp;
