@@ -54,7 +54,58 @@ export default function PlanViewPage() {
       // Import html2pdf.js for better Arabic support
       const html2pdf = (await import('html2pdf.js')).default;
 
-      // Configure options for PDF generation
+      // Add temporary PDF-specific styles directly to the original element
+      const pdfStyles = document.createElement('style');
+      pdfStyles.id = 'temp-pdf-styles';
+      pdfStyles.textContent = `
+        /* Temporary PDF-specific styles for page break control */
+        #plan-display-content p {
+          page-break-inside: avoid !important;
+          orphans: 3 !important;
+          widows: 3 !important;
+          line-height: 1.6 !important;
+          margin-bottom: 10px !important;
+        }
+
+        #plan-display-content h1,
+        #plan-display-content h2,
+        #plan-display-content h3 {
+          page-break-after: avoid !important;
+          page-break-inside: avoid !important;
+          margin-top: 20px !important;
+          margin-bottom: 10px !important;
+        }
+
+        /* Keep charts and visual elements together */
+        #plan-display-content .recharts-wrapper,
+        #plan-display-content [class*="chart"],
+        #plan-display-content [class*="Card"] {
+          page-break-inside: avoid !important;
+          margin: 15px 0 !important;
+        }
+
+        /* Arabic text specific controls */
+        #plan-display-content div:has(p) {
+          page-break-inside: avoid !important;
+        }
+
+        /* Section containers */
+        #plan-display-content > div {
+          page-break-inside: avoid !important;
+          margin-bottom: 20px !important;
+        }
+
+        /* Force page breaks for major sections */
+        #plan-display-content h2:nth-of-type(4n) {
+          page-break-before: always !important;
+          padding-top: 20px !important;
+        }
+      `;
+
+      // Add styles temporarily
+      document.head.appendChild(pdfStyles);
+
+      // Enhanced PDF options with better page break handling
       const options = {
         margin: 0.5,
         filename: `${plan.name}-Financial-Plan.pdf`,
@@ -63,21 +114,39 @@ export default function PlanViewPage() {
           scale: 2,
           useCORS: true,
           letterRendering: true,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          logging: false,
+          allowTaint: true
         },
         jsPDF: {
           unit: 'in',
           format: 'a4',
           orientation: 'portrait'
+        },
+        pagebreak: {
+          mode: 'css',
+          avoid: 'p, h1, h2, h3, .recharts-wrapper'
         }
       };
 
-      // Generate and download PDF with the beautiful formatted content
+      // Generate and download PDF
       await html2pdf().set(options).from(planElement).save();
+
+      // Clean up: remove temporary styles
+      const tempStyles = document.getElementById('temp-pdf-styles');
+      if (tempStyles) {
+        document.head.removeChild(tempStyles);
+      }
 
     } catch (error) {
       console.error('Error downloading PDF:', error);
       alert('Failed to download PDF. Please try again.');
+
+      // Clean up on error
+      const tempStyles = document.getElementById('temp-pdf-styles');
+      if (tempStyles) {
+        document.head.removeChild(tempStyles);
+      }
     } finally {
       setLoading(false);
     }
